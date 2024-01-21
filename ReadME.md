@@ -10,7 +10,8 @@ To Run the application you need to install .net core 6.0
 ---
 Change the connection string located on launchSetting.json
 
-Add-Migration
+Add-Migration "Initial"
+
 Update-Database
 
 

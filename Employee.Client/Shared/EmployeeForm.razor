@@ -1,0 +1,93 @@
+﻿@using Employee.Common.Models;
+@if (Employee is not null)
+{
+    <EditForm Model="@Employee" OnValidSubmit="@HandleValidSubmit"
+          OnInvalidSubmit="@HandleInvalidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <InputText id="firstname" class="form-control"
+                   @bind-Value="Employee.Name" />
+            <ValidationMessage For="() => Employee.Name"/>
+        </div>
+
+        <div class="mb-3">
+            <label for="Age" class="form-label">Age</label>
+            <InputNumber id="Age" class="form-control"
+            @bind-Value="Employee.Age" />
+            <ValidationMessage For="() => Employee.Age" />
+        </div>
+        <div class="mb-3">
+            <label for="Salary" class="form-label">Salary</label>
+            <InputNumber id="Salary" class="form-control"
+            @bind-Value="Employee.Salary" />
+            <ValidationMessage For="() => Employee.Salary" />
+        </div>   
+        <div class="mb-3">
+            <label for="Position" class="form-label">Position</label>
+            <InputSelect @bind-Value="@Employee.Position">
+                @foreach (var position in Enum.GetValues(typeof(Position)))
+                {
+                    <option value="@position">@position</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="() => Employee.Position" />
+        </div>
+
+       
+        @if(IsEdit)
+        {
+            <button type="submit" class="btn btn-primary" disabled="@IsBusy">Update</button>
+            <button type="button" class="btn btn-secondary"
+              @onclick="HandleCancel" disabled="@IsBusy">Cancel</button>
+        }
+        else
+        {
+            <button type="submit" class="btn btn-primary" disabled="@IsBusy">Add</button>
+        }
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public EmployeeDto? Employee { get; set; }
+    [Parameter]
+    public Position Position { get; set; }
+    [Parameter]
+    public bool IsBusy { get; set; }
+
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnSubmit { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+        {
+            await OnSubmit.InvokeAsync(true);
+        }
+    }
+
+    private async Task HandleInvalidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+        {
+            await OnSubmit.InvokeAsync(false);
+        }
+    }
+
+    private async Task HandleCancel()
+    {
+        if (OnCancel.HasDelegate)
+        {
+            await OnCancel.InvokeAsync();
+        }
+    }
+}

@@ -1,0 +1,85 @@
+﻿@page "/employees/add"
+@inject IEmployeeService employeeService
+
+<PageTitle>Add Employee</PageTitle>
+
+<h1>Add Employee</h1>
+
+<EmployeeForm Employee="@Employee"
+  IsBusy="@IsBusy"
+  OnSubmit="@HandleSubmit"/>
+
+@if (SuccessMessage is not null)
+{
+    <br />
+    <div class="alert alert-success">@SuccessMessage</div>
+}
+
+@if (ErrorMessage is not null)
+{
+    <br />
+    <div class="alert alert-danger">@ErrorMessage</div>
+}
+
+@code {
+    private EmployeeDto? Employee { get; set; } = new();
+
+
+    private bool IsBusy { get; set; }
+
+    private string? SuccessMessage { get; set; }
+
+    private string? ErrorMessage { get; set; }
+
+
+
+    private async Task HandleSubmit(bool isValid)
+    {
+        if(isValid)
+        {
+            await HandleValidSubmit();
+        }
+        else
+        {
+            HandleInvalidSubmit();
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+
+        try
+        {
+            if (Employee is not null)
+            {
+                await employeeService.PostEmployee(Employee);
+                SuccessMessage = $"Employee {Employee.Name} was added successfully.";
+                ErrorMessage = null;
+
+                // New Employee for next creation
+                Employee = new();
+            }
+        }
+        catch (Exception ex)
+        {
+            SuccessMessage = null;
+            ErrorMessage = $"Error while adding employee: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        SuccessMessage = null;
+        ErrorMessage = null;
+    }
+}

@@ -1,0 +1,103 @@
+﻿@page "/employees"
+@using Employee.Client.Services;
+@using Employee.Common.Models;
+@inject IEmployeeService employeeService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+<PageTitle>Employees</PageTitle>
+
+<h1>Employees</h1>
+
+@if (Employees is null)
+{
+    <div>Loading...</div>
+}
+else if (Employees.Count == 0)
+{
+    <div>No Employees here, Maybe u should start Hiring</div>
+}
+else
+{
+        @for (int i = 1; i <= TotalPages; i++)
+        {
+            <li class="page-item @(CurrentPage == i ? "active" : "")">
+                <a class="page-link" href="/employees/list/@i">@i</a>
+            </li>
+        }
+  
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Firstname</th>
+                <th>Lastname</th>
+                <th>Is Developer</th>
+                <th>Position</th>
+                <th>#</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in Employees)
+            {
+                <tr>
+                    <td>@employee.Name</td>
+                    <td>@employee.Salary</td>
+                    <td>@employee.Age</td>
+                    <td>@employee.Position</td>
+                    <td class="btn-group-sm">
+                        <a href="/employees/edit/@employee.Id"
+                           class="btn btn-outline-primary">
+                           Edit
+                        </a>
+                        <button class="btn btn-outline-danger"
+                           @onclick="() => HandleDelete(employee)">
+                           Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public int? CurrentPage { get; set; }
+
+    private List<EmployeeDto>? Employees { get; set; }
+
+    private int TotalPages { get; set; }
+
+    private const int ItemsPerPage = 4;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        Employees = await employeeService.GetEmployees();
+    }
+
+    private async Task HandleDelete(EmployeeDto employee)
+    {
+        var isOk = await JS.InvokeAsync<bool>("confirm",
+          $"Delete employee {employee.Name}?");
+
+        if (isOk)
+        {
+            try
+            {
+               await employeeService.DeleteEmployee(employee.Id);
+            }
+            catch (Exception e)
+            {
+                await JS.InvokeAsync<bool>("alert", "Something went wrong");
+            }
+
+            await LoadData();
+        }
+    }
+}

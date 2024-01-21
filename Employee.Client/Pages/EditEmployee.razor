@@ -1,0 +1,82 @@
+﻿@page "/employees/edit/{employeeId:int}"
+@using Employee.Common.Models;
+@inject NavigationManager NavigationManager
+@inject IEmployeeService employeeService
+<PageTitle>Edit Employee</PageTitle>
+
+<h1>Edit Employee</h1>
+
+@if (Employee is null && !IsBusy)
+{
+    <div class="alert alert-danger">Employee with Id @EmployeeId was not found.</div>
+}
+else
+{
+    <EmployeeForm Employee="@Employee"
+              IsEdit="true"
+              IsBusy="@IsBusy" 
+              OnSubmit="@HandleSubmit"
+              OnCancel="NavigateToOverviewPage"/>
+}
+
+@if (ErrorMessage is not null)
+{
+    <br/>
+    <div class="alert alert-danger">@ErrorMessage</div>
+}
+
+@code {
+    [Parameter]
+    public int EmployeeId { get; set; }
+
+    private EmployeeDto? Employee { get; set; }
+
+
+    private bool IsBusy { get; set; }
+
+    private string? ErrorMessage { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        IsBusy = true;
+
+        try
+        {
+            Employee = await employeeService.GetEmployee(EmployeeId);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task HandleSubmit(bool isValid)
+    {
+        if(Employee is null || IsBusy || !isValid)
+        {
+            ErrorMessage = null;
+            return;
+        }
+
+        IsBusy = true;
+
+        try
+        {
+            await employeeService.PostEmployee(Employee);
+            NavigateToOverviewPage();
+        }
+        catch(Exception ex)
+        {
+            ErrorMessage = $"Error while saving employee: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void NavigateToOverviewPage()
+    {
+        NavigationManager.NavigateTo($"/employees");
+    }
+}

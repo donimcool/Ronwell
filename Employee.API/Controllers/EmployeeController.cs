@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Employee.API.Entities;
-using Employee.API.Models;
+using Employee.Common.Models;
 using Employee.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -67,15 +67,24 @@ namespace Employee.API.Controllers
         {
             try
             {
-                var employeeEntity = await _employeeService.GetEmployeeAsync(employee.Id);
-                if (employeeEntity == null)
+                if (employee.Id == 0)
                 {
-                    return NotFound();
+                    await _employeeService.AddEmployeeAsync(_mapper.Map<Entities.Employee>(employee));
+                    return Ok();
                 }
-                _mapper.Map(employee, employeeEntity);
-                await _employeeService.UpdateEmployeeAsync(employeeEntity);
 
-                return Ok();
+                else
+                {
+                    var employeeEntity = await _employeeService.GetEmployeeAsync(employee.Id);
+                    if (employeeEntity == null)
+                    {
+                        return NotFound();
+                    }
+                    _mapper.Map(employee, employeeEntity);
+                    await _employeeService.UpdateEmployeeAsync(employeeEntity);
+
+                    return Ok();
+                }
             }
             catch (Exception e)
             {

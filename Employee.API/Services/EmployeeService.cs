@@ -15,7 +15,7 @@ namespace Employee.API.Services
 
         public async Task<IEnumerable<Entities.Employee>> GetEmployeesAsync()
         {
-            return await _context.Employees.OrderBy(c => c.Name).ToListAsync();
+            return await _context.Employees.Where(c => !c.IsDeleted).OrderBy(c => c.Name).ToListAsync();
         }
 
         public async Task<Entities.Employee?> GetEmployeeAsync(int empId)
@@ -29,6 +29,7 @@ namespace Employee.API.Services
                 throw new ArgumentNullException(nameof(Entities.Employee));
 
              await _context.Employees.AddAsync(employee);
+            await _context.SaveChangesAsync();
         }
         public async Task UpdateEmployeeAsync(Entities.Employee employee)
         {
@@ -48,10 +49,8 @@ namespace Employee.API.Services
         public async Task DeleteEmployeeAsync(int empId)
         {
             var existingEmployee = await _context.Employees.FindAsync(empId);
-
-            if (existingEmployee == null || existingEmployee.IsDeleted)
+            if (existingEmployee == null)
                 throw new ArgumentNullException(nameof(Entities.Employee));
-
             existingEmployee.IsDeleted = true;
 
             await _context.SaveChangesAsync();

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Employee.Common.Models;
 
 namespace Employee.API.Profiles
 {
@@ -6,7 +7,7 @@ namespace Employee.API.Profiles
     {
         public EmployeeProfile()
         {
-            CreateMap<Entities.Employee, Models.EmployeeDto>()
+            CreateMap<Entities.Employee, EmployeeDto>()
                             .ForMember(dest => dest.Position, opt => opt.MapFrom(src => src.Position))
                             .ReverseMap();
         }

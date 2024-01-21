@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Employee.Common.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace Employee.API.Entities
 {
@@ -10,14 +11,9 @@ namespace Employee.API.Entities
         public Position Position { get; set; }
         public long Salary { get; set; }
         [Required]
+        [Range(18, 125)]
         public int Age { get; set; }
 
     }
 
-    public enum Position
-    {
-        Recruiter,
-        Deveoper,
-        Manager
-    }
 }
